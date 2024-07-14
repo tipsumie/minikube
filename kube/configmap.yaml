@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: node-hello-world-config
+data:
+  DATABASE_URL: 'mongodb://localhost:27017/mydatabase'
+  LOG_LEVEL: 'debug'
+  NAME: 'Mimie Poko'

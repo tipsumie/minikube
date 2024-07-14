@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-hello-world
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: node-hello-world
+  template:
+    metadata:
+      labels:
+        app: node-hello-world
+        version: 1.2.0
+    spec:
+      containers:
+        - name: node-hello-world
+          image: node-hello-world:1.2
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          volumeMounts:
+            - name: node-hello-world-storage
+              mountPath: /app/data
+          resources:
+            limits:
+              cpu: '0.2'
+              memory: '256Mi'
+            requests:
+              cpu: '0.1'
+              memory: '128Mi'
+          envFrom:
+            - configMapRef:
+                name: node-hello-world-config
+            - secretRef:
+                name: my-secret
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: node-hello-world-config
+                  key: DATABASE_URL
+      volumes:
+        - name: node-hello-world-storage
+          persistentVolumeClaim:
+            claimName: node-hello-world-pvc
+        - name: config-volume
+          configMap:
+            name: node-hello-world-config
